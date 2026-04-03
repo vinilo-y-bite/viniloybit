@@ -1,0 +1,13 @@
+# --- CREDENCIALES Y SECRETOS (¡NUNCA SUBIR!) ---
+token.pickle
+client_secrets.json
+.env
+
+# --- CACHÉ DE PYTHON ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- ENTORNOS VIRTUALES ---
+venv/
+env/
