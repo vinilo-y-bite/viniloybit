@@ -1,0 +1,51 @@
+name: Publicador de Rock (Blogger y Facebook)
+
+on:
+  # Se ejecuta 4 veces al día (10:00, 14:00, 18:00 y 22:00 UTC)
+  # Puedes cambiar estos números según lo necesites.
+  schedule:
+    - cron: '0 10,14,18,22 * * *'
+  
+  # Permite que lo ejecutes manualmente desde la pestaña "Actions" en GitHub
+  workflow_dispatch:
+
+jobs:
+  ejecutar-bot:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write # Damos permiso al bot para guardar archivos en el repositorio
+      
+    steps:
+      - name: Clonar el repositorio
+        uses: actions/checkout@v4
+        
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          
+      - name: Instalar Dependencias
+        run: pip install requests groq google-auth-oauthlib google-api-python-client
+        
+      - name: Ejecutar Bot
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+          BLOG_ID: ${{ secrets.BLOG_ID }}
+          URL_BLOG: ${{ secrets.URL_BLOG }}
+          GOOGLE_JSON: ${{ secrets.GOOGLE_JSON }}
+          TOKEN_PICKLE_BASE64: ${{ secrets.TOKEN_PICKLE_BASE64 }}
+        run: python index.py
+        
+      - name: Guardar historial de publicaciones
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          if [ -f historial.json ]; then
+            git add historial.json
+            git commit -m "Actualizando historial de temas [skip ci]" || echo "No hay cambios"
+            git push
+          else
+            echo "No se generó historial.json en esta ejecución"
+          fi
